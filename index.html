@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Que savez-vous de la Mer de Lune ?</title>
+<style>
+:root{--mer:#12262b;--abysse:#0b1a1e;--onde:#1c3a41;--os:#efe6d2;--brume:#9fb3b3;--laiton:#c9a45c;--corail:#d46a4f;--r:6px}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:radial-gradient(ellipse at top,var(--mer),var(--abysse) 70%) fixed;color:var(--os);font:1.05rem/1.65 "Palatino Linotype",Palatino,Georgia,serif;min-height:100vh}
+main{max-width:46rem;margin:0 auto;padding:2rem 1.1rem 4rem}
+h1{font-size:clamp(1.9rem,6vw,2.9rem);line-height:1.1;margin:0 0 .4rem;font-weight:600;letter-spacing:.01em}
+.sous{color:var(--brume);margin:0 0 2rem}
+fieldset{border:0;padding:0;margin:0 0 1.4rem}
+legend{color:var(--brume);margin-bottom:.5rem;padding:0}
+.comp{display:flex;flex-wrap:wrap;gap:.45rem}
+.comp button{font:inherit;color:var(--os);background:var(--onde);border:1px solid #2e5059;border-radius:var(--r);padding:.4rem .8rem;cursor:pointer}
+.comp button[aria-pressed=true]{background:var(--laiton);border-color:var(--laiton);color:var(--abysse);font-weight:600}
+.ligne{display:flex;flex-wrap:wrap;gap:1rem;align-items:end;margin-bottom:1.6rem}
+label{display:flex;flex-direction:column;gap:.25rem;color:var(--brume);font-size:.95rem}
+input[type=number]{font:inherit;width:6rem;padding:.45rem .6rem;border-radius:var(--r);border:1px solid #2e5059;background:var(--abysse);color:var(--os)}
+.lancer{font:inherit;font-weight:600;font-size:1.15rem;padding:.6rem 1.5rem;border-radius:var(--r);border:0;background:var(--corail);color:#1a0d08;cursor:pointer}
+.lancer:hover{filter:brightness(1.08)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--laiton);outline-offset:2px}
+.opt{flex-direction:row;align-items:center;gap:.5rem}
+#score{display:flex;align-items:baseline;gap:1rem;border-top:1px solid #2e5059;padding-top:1.2rem;min-height:5.5rem}
+#total{font-size:3.6rem;line-height:1;font-weight:600;color:var(--laiton);min-width:2ch}
+#detail{color:var(--brume)}
+#detail.crit{color:var(--corail);font-weight:600}
+ul{list-style:none;padding:0;margin:1rem 0 0}
+li{display:grid;grid-template-columns:3.2rem 1fr;gap:.9rem;padding:.9rem 0;border-bottom:1px solid #254148}
+li b.pal{color:var(--laiton);font-size:1.15rem}
+li p{margin:0}
+li strong{color:#fff}
+li.neuf{animation:ap .5s ease-out}
+@keyframes ap{from{opacity:0;transform:translateY(6px)}}
+.vide{color:var(--brume);font-style:italic;padding:1rem 0}
+footer{margin-top:2.5rem;color:var(--brume);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){li.neuf{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Que savez-vous de la Mer de Lune ?</h1>
+<p class="sous">Choisissez une compétence, lancez le d20 et découvrez ce que votre personnage sait de la région.</p>
+
+<fieldset><legend>Compétence</legend><div class="comp" id="comp"></div></fieldset>
+
+<div class="ligne">
+  <label>Bonus de compétence<input type="number" id="bonus" value="0" min="-10" max="20"></label>
+  <button class="lancer" id="lancer">Lancer le d20</button>
+  <label>Ou saisir un résultat<input type="number" id="manuel" min="0" max="50" placeholder="total"></label>
+</div>
+<label class="opt"><input type="checkbox" id="cumul" checked> Révéler aussi les paliers inférieurs</label>
+
+<div id="score" aria-live="polite"><span id="total"></span><span id="detail"></span></div>
+<ul id="infos"></ul>
+
+<footer>Les paliers vont de 5 à 25. En dessous de 5, le personnage ne sait rien d'utile.</footer>
+</main>
+
+<script>
+const T={
+"Histoire":[
+[5,"La région est appelée **Mer de Lune**, mais aussi **Mer des Dragons**. C'est depuis des siècles une terre de conflits où les villes sont régulièrement détruites puis reconstruites."],
+[10,"Les humains ne sont arrivés que progressivement dans une région autrefois séparée entre les domaines elfiques du sud et les territoires des géants, ogres et autres peuples du nord. La richesse du pays — minerais, terres fertiles, pêche — explique l'acharnement à le coloniser."],
+[15,"**Northkeep** fut la première grande implantation humaine, fondée en **348 DR**. Elle fut détruite en **400 DR** par une coalition de puissances du nord appelée la **Dark Alliance**. Après la bataille, un immense rituel fit sombrer la cité sous les eaux."],
+[20,"Malgré Northkeep, les humains fondèrent ou refondèrent continuellement **Phlan, Yûlash, Hillsfar, Mulmaster, Sulasspryn** et d'autres villes. L'histoire de la région suit presque toujours le même cycle : prospérité → guerre → destruction → reconstruction."],
+[25,"Le **Temps des Troubles** a profondément modifié l'équilibre régional. Zhentil Keep a perdu une partie de sa puissance directe, mais ses réseaux et ses forces militaires n'ont pas disparu. **Hillsfar et les Zhentarim** restent engagés dans une lutte d'influence pour la domination de la région."]],
+"Société":[
+[5,"Les principales puissances sont **Hillsfar, Mulmaster, Melvaunt, Phlan** et les vestiges de la puissance de **Zhentil Keep**. Il vaut mieux ne jamais supposer que deux cités voisines sont alliées."],
+[10,"**Hillsfar** est une cité autoritaire dirigée par **Maalthiir** et ses **Red Plumes**. **Melvaunt** est une grande cité industrielle. **Mulmaster** est célèbre pour ses intrigues et ses mages. **Phlan** est en reconstruction permanente."],
+[15,"Hillsfar interdit l'accès à de nombreux non-humains et utilise son **Arène** pour ses prisonniers. Ses Red Plumes représentent une force militaire considérable."],
+[20,"La **Citadelle du Corbeau**, dans les Montagnes de l'Épine du Dragon, est devenue une importante place forte zhentarim. Sa garnison est nombreuse, mais elle est traversée par plusieurs factions rivales."],
+[25,"La disparition ou l'affaiblissement de certaines grandes puissances n'a pas pacifié la Mer de Lune. Elle a au contraire créé des **vides politiques** que villes, militaires, marchands et organisations occultes cherchent constamment à exploiter."]],
+"Survie":[
+[5,"La Mer de Lune est **froide, profonde et dangereuse**. Les tempêtes peuvent apparaître brutalement. Voyager sans préparation, même le long des côtes, est imprudent."],
+[10,"La **côte nord** est la plus rude et la plus sauvage. Les terres proches de **Thar** sont fréquentées par des bandes d'orques, d'ogres et autres humanoïdes. La **côte sud** est globalement plus douce."],
+[15,"La région est couverte de **ruines de villes, forteresses et tours abandonnées**. Une ruine apparemment isolée peut appartenir à une ancienne cité beaucoup plus vaste ou posséder plusieurs niveaux souterrains."],
+[20,"La **rivière Lis**, au sud, constitue l'une des voies stratégiques essentielles entre la Mer de Lune et les régions plus méridionales. Le secteur d'**Elmwood** est nettement plus tranquille que les environs de Mulmaster et des Montagnes Earthspur."],
+[25,"Certaines zones apparemment désertes sont volontairement évitées depuis des siècles. **Ironfang Keep** en est l'exemple classique : les riches gisements de fer voisins restent inexploités parce que personne ne souhaite s'établir à proximité."]],
+"Nature":[
+[5,"Loups, humanoïdes, monstres et prédateurs sont fréquents hors des villes. La Mer de Lune elle-même est loin d'être sûre."],
+[10,"Les territoires sauvages abritent notamment **worgs, griffons, manticores, bugbears, grandes araignées** et diverses espèces de dragons."],
+[15,"Les eaux accueillent également des créatures dangereuses : **scrags**, poissons géants, lamproies et différentes créatures humanoïdes aquatiques."],
+[20,"Certains marins parlent d'êtres pâles surnommés **« sea drow »**, capables d'aborder silencieusement les navires pour voler cargaisons et captifs. Leur véritable nature reste incertaine."],
+[25,"Les récits concernant les profondeurs de la Mer de Lune sont suffisamment cohérents pour laisser penser qu'il existe **des communautés intelligentes sous les eaux**, même si les connaissances de surface sont très fragmentaires."]],
+"Arcanes":[
+[5,"La Mer de Lune compte de nombreuses **ruines de mages, tours abandonnées et anomalies magiques**. Plusieurs sont notoirement dangereuses."],
+[10,"Certaines ruines sont antérieures aux royaumes humains actuels et leur magie ne correspond pas toujours aux traditions modernes. Des lieux sont réputés impossibles à explorer complètement."],
+[15,"**Abarat's Folly** est une tour d'ivoire inachevée construite par un mage elfe nommé **Abarat**. Les enchantements employés lors de sa construction étaient particulièrement instables."],
+[20,"Selon certaines sources, des **pièces de la Folie d'Abarat conduiraient vers d'autres plans d'existence**. Ces passages seraient une conséquence accidentelle des magies utilisées lors de sa construction."],
+[25,"La structure pourrait avoir été **altérée dans ses rapports avec les plans**, ce qui expliquerait pourquoi certaines zones paraissent mener ailleurs ou ne respecter aucune géométrie normale. Cette interprétation reste toutefois spéculative."]],
+"Histoire — Croc-de-Fer":[
+[5,"**Ironfang Keep**, appelée Croc-de-Fer dans certains récits, se trouve dans les **Montagnes Earthspur**, près de la Mer de Lune. C'est un lieu que les voyageurs évitent."],
+[10,"La forteresse est faite de **basalte noir** et ne possède apparemment **aucune fenêtre**. Elle domine la White River près de grandes chutes d'eau."],
+[15,"La forteresse est **extrêmement ancienne** : elle existait déjà avant le début du Dalereckoning. Personne ne connaît avec certitude ses constructeurs."],
+[20,"La tradition affirme qu'une communauté de **mages et d'archimages extrêmement puissants** y réside. Pourtant, pratiquement personne ne peut prétendre avoir rencontré ces mages. Des caravanes déposent parfois des marchandises devant la porte, sans entrer."],
+[25,"Même certains des plus grands érudits et archimages des Royaumes n'ont jamais fourni d'explication satisfaisante sur Croc-de-Fer. Les tentatives historiques d'exploration se terminent généralement par la disparition des expéditions. **Ce que tout le monde « sait » sur les mages du Croc-de-Fer pourrait n'être qu'une explication construite autour d'un mystère beaucoup plus ancien.**"]],
+"Religion":[
+[5,"La région compte de nombreux cultes, souvent directement liés aux puissances politiques locales. **Tempus, Tymora, Gond, Lliira, Loviatar, Cyric** et d'autres divinités y possèdent des fidèles."],
+[10,"Les conflits religieux peuvent être aussi violents que les conflits politiques. À Zhentil Keep, les cultes de **Bane et de Cyric** se sont notamment opposés."],
+[15,"La purge appelée **Banedeath** a frappé les fidèles de Bane après le Temps des Troubles, forçant certains cultes banites à se cacher."],
+[20,"Dans la Mer de Lune, une organisation religieuse peut parfaitement être simultanément **un temple, une faction politique et une organisation militaire**. Connaître le dieu vénéré ne suffit donc pas à comprendre ses objectifs."],
+[25,"Plusieurs événements majeurs de l'histoire régionale sont attribués à une intervention divine — notamment la destruction de Northkeep — mais les récits mêlent histoire, tradition religieuse et légende. Un érudit prudent ne considère pas tous leurs détails comme certains."]],
+"Investigation":[
+[5,"« Ici, toutes les villes finissent par brûler. Certaines ont simplement la mauvaise habitude de se relever. »"],
+[10,"Des cloches seraient parfois audibles sous les eaux de la Mer de Lune, là où se trouvait autrefois **Northkeep**."],
+[15,"Des marins jurent avoir aperçu des humanoïdes pâles surgir de l'eau et monter à bord des navires pendant les nuits sans lune."],
+[20,"Les eaux cacheraient non seulement des monstres mais aussi des **ruines habitées** et des communautés inconnues des habitants de la surface."],
+[25,"Les histoires les plus anciennes évoquent des lieux qui apparaissent puis disparaissent : îles, ruines ou passages accessibles seulement dans certaines circonstances. Parmi eux figure **Maos**, une île qui remonterait périodiquement des profondeurs."]]
+};
+
+const $=id=>document.getElementById(id);
+let courante=Object.keys(T)[0], total=null, vus=0;
+
+const html=s=>s.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+
+function boutons(){
+  $("comp").innerHTML="";
+  for(const nom of Object.keys(T)){
+    const b=document.createElement("button");
+    b.textContent=nom;
+    b.setAttribute("aria-pressed",nom===courante);
+    b.onclick=()=>{courante=nom;vus=0;boutons();afficher()};
+    $("comp").append(b);
+  }
+}
+
+function afficher(){
+  const ul=$("infos");
+  ul.innerHTML="";
+  if(total===null){$("total").textContent="";return}
+  $("total").textContent=total;
+  const cumul=$("cumul").checked;
+  const paliers=T[courante].filter(([p])=>p<=total);
+  const sel=cumul?paliers:paliers.slice(-1);
+  if(!sel.length){
+    ul.innerHTML='<li class="vide" style="display:block">Rien de précis : ce personnage n\'en sait pas plus que la rumeur.</li>';
+  }
+  sel.forEach(([p,txt],i)=>{
+    const li=document.createElement("li");
+    if(i>=vus)li.className="neuf";
+    li.innerHTML='<b class="pal">'+p+'+</b><p>'+html(txt)+'</p>';
+    ul.append(li);
+  });
+  vus=sel.length;
+}
+
+$("lancer").onclick=()=>{
+  const d=Math.floor(Math.random()*20)+1;
+  const b=parseInt($("bonus").value,10)||0;
+  total=d+b;
+  $("manuel").value="";
+  const det=$("detail");
+  det.className=d===20?"crit":"";
+  det.textContent="d20 : "+d+(b?(b>0?" + ":" − ")+Math.abs(b):"")+(d===20?" — réussite naturelle !":d===1?" — échec naturel":"");
+  vus=0;
+  afficher();
+};
+
+$("manuel").oninput=e=>{
+  const v=parseInt(e.target.value,10);
+  total=isNaN(v)?null:v;
+  $("detail").className="";
+  $("detail").textContent=total===null?"":"résultat saisi";
+  vus=0;
+  afficher();
+};
+
+$("cumul").onchange=()=>{vus=0;afficher()};
+
+boutons();
+</script>
+</body>
+</html>
